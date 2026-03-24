@@ -85,13 +85,17 @@ $installArgs = "/i `"$zipExtractedPath\$MSI.msi`" /q $logArgs"
 # Download driver install files
 Write-Output "[INFO] Downloading print driver for: $RepoFolderName"
 if (!(Test-Path $destination)) {
-    New-Item -ItemType Directory -Path $destination | Out-Null}
-Invoke-WebRequest -Uri $url -OutFile $zipFilePath -Method Get
-if (!(Test-Path $zipFilePath)) {
+    New-Item -ItemType Directory -Path $destination | Out-Null
+}
+
+try {
+    Invoke-WebRequest -Uri $url -OutFile ($tempFile = New-TemporaryFile) -Method Get
+    Move-Item -LiteralPath $tempFile -Destination $zipFilePath -Force
+    Write-Output '[INFO] Download complete'
+} catch {
     Write-Output '[ERROR] Download failed! Exiting with error'
     exit 1
 }
-Write-Output '[INFO] Download complete'
 
 # Extract archive
 Write-Output '[INFO] Extract archive to temp folder'
