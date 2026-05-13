@@ -47,6 +47,13 @@ Write-Output "[INFO] Downloading Bitdefender installer: $installerName"
 if (!(Test-Path $downloadFolder)) {
     New-Item -ItemType Directory -Path $downloadFolder | Out-Null
 }
+# Enable TLS 1.2
+try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+} catch {
+    Write-Output '[ERROR] Unable to download! TLS 1.2 must be supported. Exiting with error'
+}
+# Download installer
 try {
     Invoke-WebRequest -Uri $InstallerURL -OutFile ($tempFile = New-TemporaryFile) -Method Get
     Move-Item -LiteralPath $tempFile -Destination $installerPath -Force
